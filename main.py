@@ -1,17 +1,8 @@
 # GLOBALS
-from lib.GlobalManager import gmget, gmset
-from lib.RuntimeReporter import RuntimeReporter
-from lib.SimpleLogger import SimpleLogger
-from lib.WordList import WordList
-
-_LOGGER: SimpleLogger = gmset("logger", SimpleLogger("Cyber"))
-_RTMAN:  RuntimeReporter = gmset("reporter", RuntimeReporter())
-_BWLIST: WordList = gmset("bwlist", WordList("https://dl.cybfi.net/badwordlist"))
-
 from os import getenv
 AppData = getenv('HOMEDRIVE') + getenv('HOMEPATH') + "\\AppData\\Local"
 
-# DEPRECATED: in favour of lib.WordList:WordList
+
 def download_word_list():
     from pathlib import Path
     from requests import get
@@ -31,13 +22,28 @@ def check_text(input):
     from os import path
     from time import time
 
-    # if bwlist is older than 15 minutes, fetch
-    if _BWLIST.decayed_fetch(1000):
-        gmset("bwlist", _BWLIST)
+    try:
+        created = path.getctime(AppData + "\\Cyber\\badwordlist")
+        if round(round(created, 5) / 1000) > round(round(time(), 5) / 1000) + 10:
+            download_word_list()
 
-    if _BWLIST.check(input):
-        return True
-    return False
+    except FileNotFoundError:
+        download_word_list()
+
+    with open(AppData + "\\Cyber\\badwordlist") as explicit_words:
+        explicit_words = explicit_words.readlines()
+    for explicit_word in explicit_words:
+        try:
+            print(input)
+            print(explicit_word)
+            input.index(explicit_word)
+        except ValueError:
+            pass
+        else:
+            return True
+
+# /GLOBALS
+
 
 def keylogging():
     # Import dependencies
@@ -76,7 +82,6 @@ def keylogging():
 
 # Capture the screen
 def analyze_screen():
-    # noinspection PyUnresolvedReferences
     from cv2 import COLOR_BGR2GRAY, cvtColor, threshold, THRESH_OTSU, THRESH_BINARY_INV, \
         getStructuringElement, MORPH_RECT, dilate, findContours, RETR_EXTERNAL, \
         CHAIN_APPROX_NONE, boundingRect
