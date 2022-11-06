@@ -21,11 +21,9 @@ class WordList:
         return False
 
     def check(self, text: str) -> bool:
-        with open(self.local) as file:
-            for word in file.readlines():
-                if word in text:
-                    return True
-        return False
+        # if text is in the wordlist, return True (seperated by newlines)
+        with open(self.local, "r") as file:
+            return text in file.read().split("\n")
 
     def decayed_fetch(self, s: float):
         # if file is older than s seconds, fetch
