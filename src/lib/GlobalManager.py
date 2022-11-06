@@ -12,9 +12,11 @@ class GlobalItem:
 
 _GM_CACHE: dict[str, GlobalItem] = {}
 
-def gmget(name: str) -> any:
-    return _GM_CACHE[name].value
 
 def gmset(name: str, value: any) -> any:
     _GM_CACHE[name] = GlobalItem(name, value)
     return value
+
+
+def gmget(name: str) -> any:
+    return _GM_CACHE.get(name, GlobalItem("NONE", None)).value
