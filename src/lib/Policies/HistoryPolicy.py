@@ -17,21 +17,33 @@ class HistoryPolicy(Policy):
 
     def _get_history(self):
         from sqlite3 import connect, OperationalError
+        from platform import system
+        windows_supported_browsers = [
+            self.kw.appdata + "/Microsoft/Edge/User Data/Default/History",
+            self.kw.appdata + "/AVG/Browser/User Data/Default/History",
+            self.kw.appdata + "/AVAST Software/Browser/User Data/Default/History",
+            self.kw.appdata + "/Vivaldi/User Data/Default/History",
+            self.kw.appdata + "/BraveSoftware/brave-browser/User Data/Default/History",
+            self.kw.appdata + "/Chromium/User Data/Default/History",
+            self.kw.appdata + "/Google/Chrome/User Data/Default/History",
+            self.kw.appdata + "/../Roaming/Opera Software/Opera Stable/History",
+        ]
         try:
-            # this needs to be multi-browser compatible
-            # check default browser
-            db = connect(self.kw.appdata + "/Microsoft/Edge/User Data/Default/History")
+            if system() == 'Windows':
+                for browser_path in windows_supported_browsers:
+                    db = connect(browser_path)
+
+                    # noinspection SqlNoDataSourceInspection
+                    entries = db.execute("SELECT term from keyword_search_terms").fetchall()
+                    db.close()
+                    for entry in entries:
+                        entry = entry[0]
+                        if _BWLIST.check(entry):
+                            gmget("reporter").report(entry)
+
         except OperationalError as e:
             print(e)
             return
-
-        # noinspection SqlNoDataSourceInspection
-        entries = db.execute("SELECT term from keyword_search_terms").fetchall()
-        db.close()
-        for entry in entries:
-            entry = entry[0]
-            if _BWLIST.check(entry):
-                gmget("reporter").report(entry)
 
     def _THR_FUNC(self):
         while self.active:
