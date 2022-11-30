@@ -1,6 +1,7 @@
 # KnowWhere lets the app know where to put things
 
 import os
+from pathlib import path
 import sys
 
 PLATFORM = os.name
@@ -15,9 +16,18 @@ class KnowWhere:
             self.localappdata = os.getenv("LOCALAPPDATA")
             self.temp = os.getenv("TEMP")
         elif self.platform == "posix":
-            self.appdata = self.home
-            self.localappdata = self.home
-            self.temp = "/tmp"
+            if os.path.exists("/etc/os-release"):
+                self.platform = "linux"
+                self.appdata = Path("~/.config")
+                self.localappdata = self.home
+                self.temp = "/tmp"
+            else:
+                self.platform = "mac"
+                self.appdata = Path("~/Library")
+                self.localappdata = self.home
+                self.temp = os.getenv("TMPDIR")
+                
+
         else:
             raise Exception("Unknown platform")
         # CREATE DIRECTORIES
