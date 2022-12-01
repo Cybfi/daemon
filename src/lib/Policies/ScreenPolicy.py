@@ -20,7 +20,8 @@ class ScreenPolicy(Policy):
         self.name = "ScreenPolicy"
         self.active = False
 
-    def _read_screen(self):
+    @staticmethod
+    def _read_screen():
         pytesseract.tesseract_cmd = './tesseract/tesseract.exe'
         img = array(screenshot())
         gray = cvtColor(img, COLOR_BGR2GRAY)

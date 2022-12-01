@@ -4,3 +4,4 @@ opencv-python==4.6.0.66
 pytesseract==0.3.10
 pyautogui==0.9.53
 numpy==1.23.4
+elevate==0.1.3
