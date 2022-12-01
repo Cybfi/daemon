@@ -30,7 +30,18 @@ class HistoryPolicy(Policy):
                 if _BWLIST.check(entry):
                     gmget("reporter").report(entry)
         except OperationalError:
-            return
+            try:
+                db = connect(browser_path)
+
+                # noinspection SqlNoDataSourceInspection
+                entries = db.execute("SELECT input from moz_inputhistory").fetchall()
+                db.close()
+                for entry in entries:
+                    entry = entry[0]
+                    if _BWLIST.check(entry):
+                        gmget("reporter").report(entry)
+            except OperationalError:
+                return
 
     def _get_history(self):
         from pathlib import Path
